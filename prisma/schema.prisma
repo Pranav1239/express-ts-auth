@@ -1,0 +1,35 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id  @default(uuid()) @map("_id")
+  mobileNumber  String         @unique
+  password      String
+  otp           String?
+  role          Role           @default(user)
+  refreshTokens RefreshToken[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+enum Role {
+  user
+  admin
+}
+
+model RefreshToken {
+  id            String         @id  @default(uuid()) @map("_id")
+  hashedToken   String
+  userId        String
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  revoked       Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
